@@ -8,4 +8,8 @@ This project's goal was implementing the graphical interface for a board game th
 - Game funcionality like difficulty and gamemodes.
 - Additional features.
 
+The game is hosted in github pages and is playable.
+
+[Play](https://murielpinho.github.io/JinLi/)
+
  <img src="screenshots/Proj3_1.png" height="200"> <img src="screenshots/Proj3_3.png" height="200"> <img src="screenshots/Proj3_4.png" height="200">  <img src="screenshots/Proj3_2.png" height="200">
