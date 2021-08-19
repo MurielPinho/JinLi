@@ -6,7 +6,6 @@ This project's goal was implementing the graphical interface for a board game th
 - Pieces and keyframe animations for them.
 - Different environments and illumination.
 - Game funcionality like difficulty and gamemodes.
-- Link with prolog gamelogic.
 - Additional features.
 
  <img src="screenshots/Proj3_1.png" height="200"> <img src="screenshots/Proj3_3.png" height="200"> <img src="screenshots/Proj3_4.png" height="200">  <img src="screenshots/Proj3_2.png" height="200">
