@@ -10,259 +10,274 @@ Methods:
 	* Move piece (piece, starting tile, destination tile)
 	* Display the gameboard (render). Calls display of tiles and of pieces.
 */
-class MyGameBoard{
-	contructor(){
-		this.tiles = [];
-		this.pieces = [];
-		this.red_stones = [];
-		this.placed_red_stones = [];
-		this.yellow_stones = [];
-		this.placed_yellow_stones = [];
-		this.gameState;
-		
-	}
+class MyGameBoard {
+    contructor() {
+        this.tiles = [];
+        this.pieces = [];
+        this.red_stones = [];
+        this.placed_red_stones = [];
+        this.yellow_stones = [];
+        this.placed_yellow_stones = [];
+        this.gameState;
 
-	redefineStones(red_stones, yellow_stones){
-		for(let i = 0; i < this.red_stones.length; i++)
-		{
-			this.red_stones[i] = red_stones[i];
-		}
-		for(let i = 0; i < this.placed_red_stones.length; i++){
-			red_stones[this.red_stones.length + i].tile = this.placed_red_stones[i].tile;
-			this.placed_red_stones[i] = red_stones[this.red_stones.length + i];
-		}
+    }
 
-		for(let i = 0; i < this.yellow_stones.length; i++)
-		{
-			this.yellow_stones[i] = yellow_stones[i];
-		}
-		for(let i = 0; i < this.placed_yellow_stones.length; i++){
-			yellow_stones[this.yellow_stones.length + i].tile = this.placed_yellow_stones[i].tile;
-			this.placed_yellow_stones[i] = yellow_stones[this.yellow_stones.length + i];
-		}
+    redefineStones(red_stones, yellow_stones) {
+        for (let i = 0; i < this.red_stones.length; i++) {
+            this.red_stones[i] = red_stones[i];
+        }
+        for (let i = 0; i < this.placed_red_stones.length; i++) {
+            red_stones[this.red_stones.length + i].tile = this.placed_red_stones[i].tile;
+            this.placed_red_stones[i] = red_stones[this.red_stones.length + i];
+        }
+
+        for (let i = 0; i < this.yellow_stones.length; i++) {
+            this.yellow_stones[i] = yellow_stones[i];
+        }
+        for (let i = 0; i < this.placed_yellow_stones.length; i++) {
+            yellow_stones[this.yellow_stones.length + i].tile = this.placed_yellow_stones[i].tile;
+            this.placed_yellow_stones[i] = yellow_stones[this.yellow_stones.length + i];
+        }
 
 
-	}
+    }
 
-	redefinePieces(pieces){
-		for(let index in this.pieces){
-			let id = this.pieces[index].tile.id;
-			
-			this.tiles[id].piece = pieces[index];
-			pieces[index].tile = this.tiles[id];
-			pieces[index].angle = this.pieces[index].angle;
-		}
-		this.pieces = pieces;
-	}
+    redefinePieces(pieces) {
+        for (let index in this.pieces) {
+            let id = this.pieces[index].tile.id;
 
-	resetPosition(){
-		this.red_stones = [...this.red_stones, ...this.placed_red_stones];
-		this.placed_red_stones = [];
+            this.tiles[id].piece = pieces[index];
+            pieces[index].tile = this.tiles[id];
+            pieces[index].angle = this.pieces[index].angle;
+        }
+        this.pieces = pieces;
+    }
 
-		for(let index in this.red_stones){
-			this.red_stones[index].tile = null;
-		}
+    resetPosition() {
+        this.red_stones = [...this.red_stones, ...this.placed_red_stones];
+        this.placed_red_stones = [];
 
-		this.yellow_stones = [...this.yellow_stones, ...this.placed_yellow_stones];
-		this.placed_yellow_stones = [];
+        for (let index in this.red_stones) {
+            this.red_stones[index].tile = null;
+        }
 
-		for(let index in this.yellow_stones){
-			this.yellow_stones[index].tile = null;
-		}
+        this.yellow_stones = [...this.yellow_stones, ...this.placed_yellow_stones];
+        this.placed_yellow_stones = [];
 
-		for(let piece of this.pieces){
-			this.tiles[piece.originalTile].piece = piece 
-			piece.tile = this.tiles[piece.originalTile];
-		}
-	}
+        for (let index in this.yellow_stones) {
+            this.yellow_stones[index].tile = null;
+        }
 
-	dropStone(currPlayer, tile){
-		if(currPlayer == 'r')
-		{
-			let stone = this.red_stones.pop();
-			this.placed_red_stones.push(stone);
-			stone.tile = tile;
-			stone.animator = null;
-		}
-		else{
-			let stone = this.yellow_stones.pop();
-			this.placed_yellow_stones.push(stone);
-			stone.tile = tile;
-			stone.animator = null;
-		}
-	}
+        for (let piece of this.pieces) {
+            this.tiles[piece.originalTile].piece = piece
+            piece.tile = this.tiles[piece.originalTile];
+        }
+    }
 
-	isShowingSelected(){
-		for(let id in this.tiles){
-			if(this.tiles[id].selected)
-				return true;
-		}
-		return false;
-	}
+    dropStone(currPlayer, tile) {
+        this.gameState["board"][tile.line][tile.column - 1] = "stone"
+        if (currPlayer == 'r') {
+            let stone = this.red_stones.pop();
+            this.placed_red_stones.push(stone);
+            stone.tile = tile;
+            stone.animator = null;
+            this.gameState["stones"][0]--;
+            tile.stone = stone;
+        } else {
+            let stone = this.yellow_stones.pop();
+            this.placed_yellow_stones.push(stone);
+            stone.tile = tile;
+            stone.animator = null;
+            this.gameState["stones"][1]--;
+            tile.stone = stone;
 
-	removeStoneAnimator(currPlayer){
-		if (currPlayer == 'r') {
-			this.red_stones[this.red_stones.length - 1].animator = null;
-		}
-		else {
-			this.yellow_stones[this.yellow_stones.length - 1].animator = null;
-		}
-	}
+        }
+    }
 
-	setStoneAnimator(scene, initialMoment, currPlayer, dropTile){
+    isShowingSelected() {
+        for (let id in this.tiles) {
+            if (this.tiles[id].selected)
+                return true;
+        }
+        return false;
+    }
+
+    removeStoneAnimator(currPlayer) {
+        if (currPlayer == 'r') {
+            this.red_stones[this.red_stones.length - 1].animator = null;
+        } else {
+            this.yellow_stones[this.yellow_stones.length - 1].animator = null;
+        }
+    }
+
+    setStoneAnimator(scene, initialMoment, currPlayer, dropTile) {
 
         let start = {
-            translation: {x:0, y:0, z:0},
-            rotation:    {x:0, y:0, z:0},
-            scale:       {x:1, y:1, z:1}
-        }; 
+            translation: { x: 0, y: 0, z: 0 },
+            rotation: { x: 0, y: 0, z: 0 },
+            scale: { x: 1, y: 1, z: 1 }
+        };
 
         let stone_position = this.getStonePosition(currPlayer);
-        
+
         let middle = {
             translation: {
-                x: (stone_position[0] + ((dropTile.line-1)*3.85))/2, 
-                y: 30, 
-                z: (stone_position[2] - ((dropTile.column-1)*3.85))/2
+                x: (stone_position[0] + ((dropTile.line - 1) * 3.85)) / 2,
+                y: 30,
+                z: (stone_position[2] - ((dropTile.column - 1) * 3.85)) / 2
             },
-            rotation:    {x:0, y:0, z:0},
-            scale:       {x:1, y:1, z:1}
-        }; 
+            rotation: { x: 0, y: 0, z: 0 },
+            scale: { x: 1, y: 1, z: 1 }
+        };
 
 
         let end = {
             translation: {
-                x: stone_position[0] + ((dropTile.line-1)*3.85), 
-                y: 0, 
-                z: stone_position[2] - ((dropTile.column-1)*3.85)
+                x: stone_position[0] + ((dropTile.line - 1) * 3.85),
+                y: 0,
+                z: stone_position[2] - ((dropTile.column - 1) * 3.85)
             },
-            rotation:    {x:0, y:0, z:0},
-            scale:       {x:1, y:1, z:1}
-        }; 
+            rotation: { x: 0, y: 0, z: 0 },
+            scale: { x: 1, y: 1, z: 1 }
+        };
 
         let frames = [];
         frames[initialMoment] = start;
-        frames[initialMoment+0.3] = middle;
-        frames[initialMoment+0.6] = end;
+        frames[initialMoment + 0.3] = middle;
+        frames[initialMoment + 0.6] = end;
 
         let animator = new KeyframeAnimator(frames, scene);
 
-		if(currPlayer == 'r')
-		{
-			this.red_stones[this.red_stones.length - 1].animator = animator;
-		}
-		else{
-			this.yellow_stones[this.yellow_stones.length - 1].animator = animator;
-		}
-	}
+        if (currPlayer == 'r') {
+            this.red_stones[this.red_stones.length - 1].animator = animator;
+        } else {
+            this.yellow_stones[this.yellow_stones.length - 1].animator = animator;
+        }
+    }
 
-	animateStone(currPlayer, time){
-		if(currPlayer == 'r')
-		{
-			this.red_stones[this.red_stones.length - 1].animator.update(time);
-			return !this.red_stones[this.red_stones.length - 1].animator.ended;
+    animateStone(currPlayer, time) {
+        if (currPlayer == 'r') {
+            this.red_stones[this.red_stones.length - 1].animator.update(time);
+            return !this.red_stones[this.red_stones.length - 1].animator.ended;
 
-		}
-		this.yellow_stones[this.yellow_stones.length - 1].animator.update(time);
+        }
+        this.yellow_stones[this.yellow_stones.length - 1].animator.update(time);
 
-		return !this.yellow_stones[this.yellow_stones.length - 1].animator.ended;
-	}
+        return !this.yellow_stones[this.yellow_stones.length - 1].animator.ended;
+    }
 
-	getStonePosition(currPlayer){
-		if(currPlayer == 'r')
-			return [-(-4.9+(this.red_stones.length)*3), 0 ,-6];
-		
-		return [-(-4.9+(this.yellow_stones.length)*3), 0, 29];
-	}
+    getStonePosition(currPlayer) {
+        if (currPlayer == 'r')
+            return [-(-4.9 + (this.red_stones.length) * 3), 0, -6];
 
-	getTileByPosition(line,column){
-		let id = String.fromCharCode(64+column)+(8-line);
-		return this.tiles[id];
-	}
+        return [-(-4.9 + (this.yellow_stones.length) * 3), 0, 29];
+    }
 
-	getTile(ID){
-		return this.tiles[ID];
-	}
+    getTileByPosition(line, column) {
+        let id = String.fromCharCode(64 + line) + column
+        return this.tiles[id];
+    }
 
-	setTiles(tiles){
+    getTile(ID) {
+        return this.tiles[ID];
+    }
 
-		for(let id in tiles){
-			tiles[id].gameboard = this;
-		}
-		this.tiles = tiles;
-	}
+    setTiles(tiles) {
 
-	setPieces(pieces){
-		this.pieces = pieces;
-		for(let piece of this.pieces){
-			if (this.tiles[piece.tile])
-			{
-				this.tiles[piece.tile].piece = piece 
-				piece.tile = this.tiles[piece.tile];
-			}
-		}
-	}
+        for (let id in tiles) {
+            tiles[id].gameboard = this;
+        }
+        this.tiles = tiles;
+    }
 
-	selectTiles(positions){
-		for(let position of positions){
-			let id = String.fromCharCode(64+position[1])+(8-position[0]);
-			this.tiles[id].select();
-		}
+    setPieces(pieces) {
+        this.pieces = pieces;
+        for (let piece of this.pieces) {
+            if (this.tiles[piece.tile]) {
+                this.tiles[piece.tile].piece = piece
+                piece.tile = this.tiles[piece.tile];
+            }
+        }
+    }
 
-	}
+    selectTiles(positions) {
+        for (let position of positions) {
+            let id = String.fromCharCode(64 + position[0]) + position[1];
+            this.tiles[id].select();
+        }
 
-	movePiece(fromTile, toTile){
-		fromTile.piece.tile = toTile;
-		toTile.piece = fromTile.piece;
-		fromTile.piece = null;
-	}
+    }
 
-	removeStone(scene,currPlayer,time){
-		if (currPlayer == 'y') {
+    increaseScore(toTile, currPlayer) {
+        let result = 0;
+        for (let lineIndex = -1; lineIndex < 2; lineIndex++) {
+            for (let columnIndex = -1; columnIndex < 2; columnIndex++) {
+                let tile = this.getTileByPosition(toTile.line + lineIndex, toTile.column + columnIndex);
+                if (tile && tile.piece && lineIndex + columnIndex != 0) {
+                    result++;
+                }
+            }
+        }
+        if (currPlayer === 'r') {
+            this.gameState['scores'][0] += Math.min(result, 3);
+        } else {
+            this.gameState['scores'][1] += Math.min(result, 3);
+        }
+    }
 
-			let stone = this.placed_yellow_stones.pop();
-			stone.tile = null;
-			this.yellow_stones.push(stone);
-		}
-		else {
-			let stone = this.placed_red_stones.pop();
-			stone.tile = null;
-			this.red_stones.push(stone);
-		}
 
-		this.removeStoneAnimator(currPlayer);
-		this.animateStone(currPlayer, time);
-	}
+    movePiece(fromTile, toTile, currPlayer) {
+        let board = this.gameState["board"]
+        let piece = board[fromTile.line][fromTile.column - 1]
+        board[toTile.line][toTile.column - 1] = piece;
+        board[fromTile.line][fromTile.column - 1] = "empty"
+        fromTile.piece.tile = toTile;
+        toTile.piece = fromTile.piece;
+        fromTile.piece = null;
+        this.increaseScore(toTile, currPlayer);
 
-	unselectAllTiles(){
-		for(let id in this.tiles){
-			this.tiles[id].select(false);
-		}
-	}
+    }
 
-	getTile(stringPosition)
-	{
-		if(this.tiles[stringPosition] != -1)
-			return this.tiles[stringPosition];
-		return false;
-	}
+    removeStone(scene, currPlayer, time) {
+        if (currPlayer == 'y') {
 
-	getScore(){
-		return this.gameState['scores'];
-	}
+            let stone = this.placed_yellow_stones.pop();
+            stone.tile = null;
+            this.yellow_stones.push(stone);
+        } else {
+            let stone = this.placed_red_stones.pop();
+            stone.tile = null;
+            this.red_stones.push(stone);
+        }
 
-	gameEnded()
-	{
-		if (this.gameState['scores'][0]>= 10)
-		{
-			return 1;
-		}
-		else if (this.gameState['scores'][1] >= 10)
-		{
-			return 2;
-		}
-			return 0;
-	}
+        this.removeStoneAnimator(currPlayer);
+        this.animateStone(currPlayer, time);
+    }
+
+    unselectAllTiles() {
+        for (let id in this.tiles) {
+            this.tiles[id].select(false);
+        }
+    }
+
+    getTile(stringPosition) {
+        if (this.tiles[stringPosition] != -1)
+            return this.tiles[stringPosition];
+        return false;
+    }
+
+    getScore() {
+        return this.gameState['scores'];
+    }
+
+    gameEnded() {
+        if (this.gameState['scores'][0] >= 10) {
+            return 1;
+        } else if (this.gameState['scores'][1] >= 10) {
+            return 2;
+        }
+        return 0;
+    }
 
 
 }

@@ -9,56 +9,54 @@ Methods:
 */
 class MyTile extends CGFobject {
 
-	constructor(scene, id, selectedMaterial, unselectedMaterial) {
-		super(scene);
-			
-		this.id = id;
+    constructor(scene, id, selectedMaterial, unselectedMaterial) {
+        super(scene);
 
-		this.line = id.toLowerCase().charCodeAt(0) - 96;
-		this.column = parseInt(id[1]);
+        this.id = id;
 
-		this.selectedMaterial = selectedMaterial;
-		this.unselectedMaterial = unselectedMaterial;
+        this.line = id.toLowerCase().charCodeAt(0) - 96;
+        this.column = parseInt(id[1]);
 
-		this.material = unselectedMaterial;
-		this.selected = false;
+        this.selectedMaterial = selectedMaterial;
+        this.unselectedMaterial = unselectedMaterial;
 
-		this.plane = new MyPlane(scene, 1, 1);
+        this.material = unselectedMaterial;
+        this.selected = false;
 
-		this.gameboard = null;
-		this.piece = null;
+        this.plane = new MyPlane(scene, 1, 1);
 
-	}
-	
+        this.gameboard = null;
+        this.piece = null;
+        this.stone = null;
 
-	hasPlayer(player){
-		return this.gameboard != null && this.piece != null && this.piece.color == player;
+    }
 
-	}
 
-	select(value = null){
+    hasPlayer(player) {
+        return this.gameboard != null && this.piece != null && this.piece.color == player;
 
-		if(value != null)
-		{
-			this.selected = value;
-			if(value)
-				this.material = this.selectedMaterial;
-			else
-				this.material = this.unselectedMaterial;
-			return;
-		}
-		this.selected = !this.selected;
-		if(this.material == this.unselectedMaterial)
-			this.material = this.selectedMaterial;
-		else
-			this.material = this.unselectedMaterial;
-	}
+    }
 
-	display()
-	{
-		this.material.apply();
+    select(value = null) {
+
+        if (value != null) {
+            this.selected = value;
+            if (value)
+                this.material = this.selectedMaterial;
+            else
+                this.material = this.unselectedMaterial;
+            return;
+        }
+        this.selected = !this.selected;
+        if (this.material == this.unselectedMaterial)
+            this.material = this.selectedMaterial;
+        else
+            this.material = this.unselectedMaterial;
+    }
+
+    display() {
+        this.material.apply();
         this.plane.display();
-	}
+    }
 
 }
-
