@@ -6,62 +6,57 @@ Methods:
 	• Feeds move replay
 */
 
-class MyGameSequence{
-	contructor() {
-		this.moveStack;
-		this.currentMove = null;
-	}
+class MyGameSequence {
+    constructor(gameBoard) {
+        this.moveStack = [];
+        this.currentMove = null;
+        this.gameBoard = gameBoard;
+    }
 
-	addMove(move)
-	{
-		this.moveStack.push(move);
-	}
-	
-	undoMove() {
-		return this.moveStack.pop();
-	}
+    addMove(move) {
+        this.moveStack.push(move);
+    }
 
-	getMoves()
-	{
-		return this.moveStack;
-	}
+    undoMove() {
+        return this.moveStack.pop();
+    }
 
-	showAnimation(time){
+    getMoves() {
+        return this.moveStack;
+    }
+
+    showAnimation(time) {
 
 
-		if(this.currentMove == null){
-			this.gameBoard.resetPosition();
-			this.currentMove = 0;
-		}
-		
-		if(this.currentMove >= this.moveStack.length)
-		{
-			this.currentMove = null;
-			return false;
-		}
+        if (this.currentMove == null) {
+            this.gameBoard.resetPosition();
+            this.currentMove = 0;
+        }
 
-		this.currPlayer = this.currPlayer || 'r';
-		if(this.moveStack[this.currentMove].movedPiece instanceof MyPiece)
-			this.currPlayer = this.moveStack[this.currentMove].movedPiece.color;
+        if (this.currentMove >= this.moveStack.length) {
+            this.currentMove = null;
+            return false;
+        }
 
-		if(!this.moveStack[this.currentMove].animate(time, this.currPlayer , this.gameBoard))
-		{
-			this.moveStack[this.currentMove].movedPiece.tile = this.moveStack[this.currentMove].destinationTile;
-			this.moveStack[this.currentMove].animationStarted = false;
-			if(this.moveStack[this.currentMove].movedPiece instanceof MyPiece)
-			{
-				this.moveStack[this.currentMove].movedPiece.animator = null;
-				this.moveStack[this.currentMove].destinationTile.piece = this.moveStack[this.currentMove].movedPiece;
-				this.moveStack[this.currentMove].originTile.piece = null;
-			}
-			else{
-				this.gameBoard.dropStone(this.currPlayer, this.moveStack[this.currentMove].destinationTile);
-				console.log(this.gameBoard.red_stones);
-				console.log(this.gameBoard.yellow_stones);
-			}
-			this.currentMove++;
-		}
+        this.currPlayer = this.currPlayer || 'r';
+        if (this.moveStack[this.currentMove].movedPiece instanceof MyPiece)
+            this.currPlayer = this.moveStack[this.currentMove].movedPiece.color;
 
-		return true;
-	}
+        if (!this.moveStack[this.currentMove].animate(time, this.currPlayer, this.gameBoard)) {
+            this.moveStack[this.currentMove].movedPiece.tile = this.moveStack[this.currentMove].destinationTile;
+            this.moveStack[this.currentMove].animationStarted = false;
+            if (this.moveStack[this.currentMove].movedPiece instanceof MyPiece) {
+                this.moveStack[this.currentMove].movedPiece.animator = null;
+                this.moveStack[this.currentMove].destinationTile.piece = this.moveStack[this.currentMove].movedPiece;
+                this.moveStack[this.currentMove].originTile.piece = null;
+            } else {
+                this.gameBoard.dropStone(this.currPlayer, this.moveStack[this.currentMove].destinationTile);
+                console.log(this.gameBoard.red_stones);
+                console.log(this.gameBoard.yellow_stones);
+            }
+            this.currentMove++;
+        }
+
+        return true;
+    }
 }

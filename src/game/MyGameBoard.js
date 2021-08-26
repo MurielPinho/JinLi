@@ -11,14 +11,26 @@ Methods:
 	* Display the gameboard (render). Calls display of tiles and of pieces.
 */
 class MyGameBoard {
-    contructor() {
+    constructor() {
         this.tiles = [];
         this.pieces = [];
         this.red_stones = [];
         this.placed_red_stones = [];
         this.yellow_stones = [];
         this.placed_yellow_stones = [];
-        this.gameState;
+        this.gameState = {
+            "board": {
+                7: ["r", "empty", "empty", "empty", "empty", "empty", "y"],
+                6: ["empty", "empty", "empty", "empty", "empty", "empty", "empty"],
+                5: ["empty", "empty", "empty", "empty", "empty", "empty", "empty"],
+                4: ["empty", "empty", "empty", "empty", "empty", "empty", "empty"],
+                3: ["empty", "empty", "empty", "empty", "empty", "empty", "empty"],
+                2: ["empty", "empty", "empty", "empty", "empty", "empty", "empty"],
+                1: ["r", "empty", "empty", "empty", "empty", "empty", "y"]
+            },
+            "stones": [10, 10],
+            "scores": [0, 0]
+        };
 
     }
 
@@ -219,9 +231,9 @@ class MyGameBoard {
             }
         }
         if (currPlayer === 'r') {
-            this.gameState['scores'][0] += Math.min(result, 3);
+            this.gameState['scores'][0] += result;
         } else {
-            this.gameState['scores'][1] += Math.min(result, 3);
+            this.gameState['scores'][1] += result;
         }
     }
 
@@ -234,6 +246,15 @@ class MyGameBoard {
         fromTile.piece.tile = toTile;
         toTile.piece = fromTile.piece;
         fromTile.piece = null;
+        this.increaseScore(toTile, currPlayer);
+
+    }
+
+    movePieceBot(fromTile, toTile, currPlayer) {
+        let board = this.gameState["board"]
+        let piece = board[fromTile.line][fromTile.column - 1]
+        board[toTile.line][toTile.column - 1] = piece;
+        board[fromTile.line][fromTile.column - 1] = "empty"
         this.increaseScore(toTile, currPlayer);
 
     }
@@ -279,5 +300,92 @@ class MyGameBoard {
         return 0;
     }
 
+    moveType(fromTile, toTile) {
+        let maxTiles = Math.max(Math.abs(fromTile.line - toTile.line), Math.abs(fromTile.column - toTile.column))
+        return maxTiles === 2 ? "jump" : "walk"
+    }
 
+    validMoves(pieceLine, pieceColumn) {
+        var adjacent = [];
+        for (let lineIndex = -1; lineIndex < 2; lineIndex++) {
+            for (let columnIndex = -1; columnIndex < 2; columnIndex++) {
+                let tile = this.getTileByPosition(pieceLine + lineIndex, pieceColumn + columnIndex);
+                if (tile) {
+                    if (!tile.piece && !tile.stone) {
+                        adjacent.push([pieceLine + lineIndex, pieceColumn + columnIndex])
+                    } else if (tile.stone) {
+                        let nextTile = this.getTileByPosition(pieceLine + lineIndex * 2, pieceColumn + columnIndex * 2);
+                        if (nextTile && !nextTile.piece && !nextTile.stone)
+                            adjacent.push([pieceLine + lineIndex * 2, pieceColumn + columnIndex * 2])
+                    }
+                }
+            }
+        }
+        return adjacent;
+    }
+
+    validDrops(gameState) {
+        let emptyTiles = [];
+        for (let line = 1; line <= 7; line++) {
+            for (let column = 1; column <= 7; column++) {
+                if (gameState["board"][line][column - 1] === "empty") emptyTiles.push([line, column])
+            }
+        }
+        return emptyTiles;
+    }
+
+    getBotMove(difficulty, currPlayer) {
+        let moves = [],
+            pieces;
+        pieces = this.pieces.filter(piece => (piece.color === currPlayer))
+        for (const piece of pieces) {
+            this.validMoves(piece.tile.line, piece.tile.column).forEach(move => moves.push([
+                [piece.tile.line, piece.tile.column], move
+            ]));
+        }
+        let choosenMove, points, choosenDrop, tmpMove, tmpDrop, tmpPoints, tmp, dasd
+        if (!difficulty) {
+            points = 0;
+            moves.forEach((currentMove) => {
+                [tmpMove, tmpDrop, tmpPoints, tmp] = this.simulateMove(currentMove)
+                if (tmpPoints >= points) {
+                    choosenMove = tmpMove;
+                    choosenDrop = tmpDrop;
+                    points = tmpPoints;
+                    dasd = tmp
+                }
+            });
+        } else {
+            choosenMove = moves[Math.floor(Math.random() * moves.length)];
+            [choosenMove, choosenDrop, points] = this.simulateMove(choosenMove)
+        }
+        let maxTiles = Math.max(Math.abs(choosenMove[0][0] - choosenMove[1][0]), Math.abs(choosenMove[0][1] - choosenMove[1][1]))
+        let moveType = (maxTiles < 2) ? "walk" : "jump";
+        return [moveType, choosenMove, choosenDrop]
+    }
+
+    simulateMove(move) {
+        let tmpGameState = JSON.parse(JSON.stringify(this.gameState));
+        tmpGameState["board"][move[1][0]][move[1][1] - 1] = tmpGameState["board"][move[0][0]][move[0][1] - 1];
+        tmpGameState["board"][move[0][0]][move[0][1] - 1] = "empty";
+        let points = 0;
+        let fromLine = move[1][0]
+        let fromColumn = move[1][1]
+        let toLine = move[0][0]
+        let toColumn = move[0][1]
+        for (let columnIndex = -1; columnIndex < 2; columnIndex++) {
+            for (let lineIndex = -1; lineIndex < 2; lineIndex++) {
+                if (lineIndex + fromLine <= 0 || lineIndex + fromLine >= 8 || columnIndex + fromColumn <= 0 || columnIndex + fromColumn >= 8 || (lineIndex === 0 && columnIndex == 0) || (fromLine === toLine && toColumn === fromColumn)) continue;
+                let tile = tmpGameState["board"][lineIndex + fromLine][columnIndex + fromColumn - 1];
+                if (tile == 'r' || tile == 'y') {
+                    points++
+                }
+            }
+
+        }
+        let drops = this.validDrops(tmpGameState);
+        let choosenDrop = drops[Math.floor(Math.random() * drops.length)]
+        return [move, choosenDrop, points, tmpGameState]
+
+    }
 }

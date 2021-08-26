@@ -11,11 +11,7 @@ class MyGameOrchestrator {
         this.scene = scene;
         this.animator = new MyAnimator();
         this.gameboard = new MyGameBoard();
-        this.gameSequence = new MyGameSequence();
-
-        //constructor not working idk why
-        this.gameSequence.gameBoard = this.gameboard;
-        this.gameSequence.currentMove = null;
+        this.gameSequence = new MyGameSequence(this.gameboard);
 
         this.theme = new MySceneGraph('lake.xml', scene);
 
@@ -47,22 +43,7 @@ class MyGameOrchestrator {
             this.gameboard.setPieces(this.theme.pieces);
             this.score.setLevel(this.level);
             this.gameboard.red_stones = this.theme.red_stones;
-            this.gameboard.placed_red_stones = [];
             this.gameboard.yellow_stones = this.theme.yellow_stones;
-            this.gameboard.placed_yellow_stones = [];
-            this.gameboard.gameState = {
-                "board": {
-                    7: ["r", "empty", "empty", "empty", "empty", "empty", "y"],
-                    6: ["empty", "empty", "empty", "empty", "empty", "empty", "empty"],
-                    5: ["empty", "empty", "empty", "empty", "empty", "empty", "empty"],
-                    4: ["empty", "empty", "empty", "empty", "empty", "empty", "empty"],
-                    3: ["empty", "empty", "empty", "empty", "empty", "empty", "empty"],
-                    2: ["empty", "empty", "empty", "empty", "empty", "empty", "empty"],
-                    1: ["r", "empty", "empty", "empty", "empty", "empty", "y"]
-                },
-                "stones": [10, 10],
-                "scores": [0, 0]
-            };
             this.gameSequence.moveStack = [];
             this.gameStateStack = [];
             this.firstLoad = false;
@@ -102,42 +83,39 @@ class MyGameOrchestrator {
     setMode(level, game_mode) {
 
 
-        // if (game_mode == 'Player vs. Player') {
-        //     this.redPlayerMode = 'Human';
-        //     this.yellowPlayerMode = 'Human';
-        //     this.level = level;
-        //     this.mode = 'Player vs Player';
-        // } else if (game_mode == 'Player vs. CPU') {
-        //     this.mode = 'Player vs CPU';
-        //     this.level = level;
-        //     if (this.level == 1) {
-        //         this.redPlayerMode = 'Human';
-        //         this.yellowPlayerMode = 'Easy';
-        //     } else {
-        //         this.redPlayerMode = 'Human';
-        //         this.yellowPlayerMode = 'Hard';
-        //     }
+        if (game_mode == 'Player vs. Player') {
+            this.redPlayerMode = 'Human';
+            this.yellowPlayerMode = 'Human';
+            this.level = level;
+            this.mode = 'Player vs Player';
+        } else if (game_mode == 'Player vs. CPU') {
+            this.mode = 'Player vs CPU';
+            this.level = level;
+            if (this.level == 1) {
+                this.redPlayerMode = 'Human';
+                this.yellowPlayerMode = 'Easy';
+            } else {
+                this.redPlayerMode = 'Human';
+                this.yellowPlayerMode = 'Hard';
+            }
 
-        // } else if (game_mode == 'CPU vs. CPU') {
-        //     this.mode = 'CPU vs CPU';
-        //     this.level = level;
-        //     if (this.level == 1) {
-        //         this.redPlayerMode = 'Easy';
-        //         this.yellowPlayerMode = 'Easy';
-        //     } else {
-        //         this.redPlayerMode = 'Hard';
-        //         this.yellowPlayerMode = 'Hard';
-        //     }
-        // } else {
-        //     this.redPlayerMode = 'Human';
-        //     this.yellowPlayerMode = 'Human';
-        //     this.level = 1;
-        //     this.mode = 'Player vs Player';
-        // }
-        this.redPlayerMode = 'Human';
-        this.yellowPlayerMode = 'Human';
-        this.level = 1;
-        this.mode = 'Player vs Player';
+        } else if (game_mode == 'CPU vs. CPU') {
+            this.mode = 'CPU vs CPU';
+            this.level = level;
+            if (this.level == 1) {
+                this.redPlayerMode = 'Easy';
+                this.yellowPlayerMode = 'Easy';
+            } else {
+                this.redPlayerMode = 'Hard';
+                this.yellowPlayerMode = 'Hard';
+            }
+        } else {
+            this.redPlayerMode = 'Human';
+            this.yellowPlayerMode = 'Human';
+            this.level = 1;
+            this.mode = 'Player vs Player';
+        }
+
     }
 
     update(time) {
@@ -163,7 +141,6 @@ class MyGameOrchestrator {
                 {
                     let playerMode = this.currPlayer == 'r' ? this.redPlayerMode : this.yellowPlayerMode;
                     if (playerMode != 'Human') {
-                        // this.prolog.sendMoveBot(this.gameboard.gameState, this.currPlayer, playerMode);
                         this.state = 'waiting move bot results';
                     }
                     break;
@@ -189,12 +166,13 @@ class MyGameOrchestrator {
                 this.gameMove = new MyGameMove(this.scene, this.fromTile.piece, this.fromTile, this.toTile);
                 this.gameSequence.addMove(this.gameMove);
                 this.gameboard.movePiece(this.fromTile, this.toTile, this.currPlayer);
+                this.currAction = this.gameboard.moveType(this.fromTile, this.toTile);
                 this.gameStateStack.push(gameState);
                 this.score.updateScore(this.gameboard.getScore());
                 this.state = 'waiting move tile';
 
                 if (this.currAction == 'walk' && gameState.getStones(this.currPlayer) > 0) {
-                    this.gameboard.selectTiles(this.validDrops(this.gameboard.gameState));
+                    this.gameboard.selectTiles(this.gameboard.validDrops(this.gameboard.gameState));
                     this.state = 'waiting drop tile click';
                 } else {
                     this.state = 'set camera to rotate';
@@ -280,7 +258,7 @@ class MyGameOrchestrator {
                     if (playerMode != 'Human') {
                         this.state = 'undo move';
                     } else {
-                        validDrops(this.gameboard.gameState);
+                        this.gameboard.validDrops(this.gameboard.gameState);
                         this.state = 'waiting drop tiles result';
                     }
 
@@ -295,52 +273,55 @@ class MyGameOrchestrator {
                 if (playerMode == 'Human')
                     this.state = 'waiting select piece';
                 else {
-                    this.prolog.sendMoveBot(this.gameboard.gameState, this.currPlayer, playerMode);
                     this.state = 'waiting move bot results';
                 }
                 break;
 
             case 'waiting move bot results':
-                if (this.prolog.requestReady) {
 
-                    let gameState = new MyGameState(this.prolog.parsedResult[0]);
-                    this.gameboard.gameState = gameState;
-                    this.gameStateStack.push(gameState);
-                    let move = this.prolog.parsedResult[1];
-                    this.fromTile = this.gameboard.getTileByPosition(move[0], move[1]);
-                    this.toTile = this.gameboard.getTileByPosition(move[2], move[3]);
-                    this.gameMove = new MyGameMove(this.scene, this.fromTile.piece, this.fromTile, this.toTile);
-                    this.gameSequence.addMove(this.gameMove);
-                    let dropPosition = this.prolog.parsedResult[2];
-                    this.dropTile = dropPosition ? this.gameboard.getTileByPosition(dropPosition[0], dropPosition[1]) : null;
-                    let stone;
-                    if (this.currPlayer == 'r') {
-                        stone = this.gameboard.red_stones[this.gameboard.red_stones.length - 1]
-                    } else {
-                        stone = this.gameboard.yellow_stones[this.gameboard.yellow_stones.length - 1]
-                    }
-                    this.gameMove = new MyGameMove(this.scene, stone, null, this.dropTile);
-                    this.gameSequence.addMove(this.gameMove);
-                    this.gameStateStack.push(gameState);
-                    let score = this.gameboard.getScore();
-                    if (score != null)
-                        this.score.updateScore(this.gameboard.getScore());
-                    this.fromTile.piece.setAnimator(this.toTile, this.fromTile, this.secsFromStart);
-
-
-                    this.state = 'animating bot move';
-                    if (this.gameboard.gameEnded()) {
-                        this.state = 'game over';
-
-                    }
+                let botMove = this.gameboard.getBotMove(this.level, this.currPlayer);
+                let gameStateBot = new MyGameState(this.gameboard.gameState);
+                this.gameStateStack.push(gameStateBot);
+                let botPieceMove = botMove[1];
+                this.fromTile = this.gameboard.getTileByPosition(botPieceMove[0][0], botPieceMove[0][1]);
+                this.toTile = this.gameboard.getTileByPosition(botPieceMove[1][0], botPieceMove[1][1]);
+                this.gameMove = new MyGameMove(this.scene, this.fromTile.piece, this.fromTile, this.toTile);
+                this.gameSequence.addMove(this.gameMove);
+                this.gameboard.movePieceBot(this.fromTile, this.toTile, this.currPlayer);
+                this.currAction = botMove[0];
+                this.score.updateScore(this.gameboard.getScore());
+                let dropPosition = botMove[2];
+                this.dropTile = (this.currAction === 'walk') ? this.gameboard.getTileByPosition(dropPosition[0], dropPosition[1]) : null;
+                let stoneBot, scoreBot
+                if (this.currPlayer == 'r') {
+                    stoneBot = this.gameboard.red_stones[this.gameboard.red_stones.length - 1]
+                } else {
+                    stoneBot = this.gameboard.yellow_stones[this.gameboard.yellow_stones.length - 1]
                 }
+                this.gameMove = new MyGameMove(this.scene, stoneBot, null, this.dropTile);
+                this.gameSequence.addMove(this.gameMove);
+                this.gameStateStack.push(gameStateBot);
+                scoreBot = this.gameboard.getScore();
+                if (scoreBot != null)
+                    this.score.updateScore(this.gameboard.getScore());
+                this.fromTile.piece.setAnimator(this.toTile, this.fromTile, this.secsFromStart);
+
+
+                this.state = 'animating bot move';
+                if (this.gameboard.gameEnded()) {
+                    this.state = 'game over';
+
+                }
+
                 break;
 
             case 'animating bot move':
                 if (!this.fromTile.piece.animate(this.secsFromStart)) {
                     this.fromTile.piece.animator = null;
 
-                    this.gameboard.movePiece(this.fromTile, this.toTile);
+                    this.fromTile.piece.tile = this.toTile;
+                    this.toTile.piece = this.fromTile.piece;
+                    this.fromTile.piece = null;
 
                     if (this.dropTile == null) {
                         this.state = 'set camera to rotate';
@@ -405,37 +386,10 @@ class MyGameOrchestrator {
                 this.menu.toggleMenu();
         }
 
-        if (this.scene.gui.isKeyPressed("Space")) console.log(this.gameboard)
-    }
-
-    validMoves(pieceLine, pieceColumn) {
-        var adjacent = [];
-        for (let lineIndex = -1; lineIndex < 2; lineIndex++) {
-            for (let columnIndex = -1; columnIndex < 2; columnIndex++) {
-                let tile = this.gameboard.getTileByPosition(pieceLine + lineIndex, pieceColumn + columnIndex);
-                if (tile) {
-                    if (!tile.piece && !tile.stone) {
-                        adjacent.push([pieceLine + lineIndex, pieceColumn + columnIndex])
-                    } else if (tile.stone) {
-                        let nextTile = this.gameboard.getTileByPosition(pieceLine + lineIndex * 2, pieceColumn + columnIndex * 2);
-                        if (nextTile && !nextTile.piece && !nextTile.stone)
-                            adjacent.push([pieceLine + lineIndex * 2, pieceColumn + columnIndex * 2])
-                    }
-                }
-
-            }
+        if (this.scene.gui.isKeyPressed("Space")) {
+            let result = this.gameboard.getBotMove(1, this.currPlayer);
+            this.gameboard.selectTiles([result[1][1]])
         }
-        return adjacent;
-    }
-
-    validDrops() {
-        let empty = [];
-        for (let line = 1; line <= 7; line++) {
-            for (let column = 1; column <= 7; column++) {
-                if (this.gameboard.gameState["board"][line][column - 1] === "empty") empty.push([line, column])
-            }
-        }
-        return empty;
     }
 
     managePick(mode, results) {
@@ -455,22 +409,21 @@ class MyGameOrchestrator {
 
     onObjectSelected(obj, id) {
         if (obj instanceof MyPiece) {
-
             switch (this.state) {
                 case 'waiting select piece':
                     if (obj.color == this.currPlayer) {
-                        let tiles = this.validMoves(obj.tile.line, obj.tile.column);
+                        let tiles = this.gameboard.validMoves(obj.tile.line, obj.tile.column);
+                        this.gameboard.unselectAllTiles();
+
                         this.gameboard.selectTiles(tiles);
                         this.state = 'waiting move tile';
                         this.fromTile = obj.tile;
-
                     }
                     break;
 
                 case 'waiting move tile':
                     this.gameboard.unselectAllTiles();
                     this.state = 'waiting select piece';
-
                     break;
             }
 
@@ -478,7 +431,8 @@ class MyGameOrchestrator {
             switch (this.state) {
                 case 'waiting select piece':
                     if (obj.hasPlayer(this.currPlayer)) {
-                        let tiles = this.validMoves(obj.line, obj.column);
+                        let tiles = this.gameboard.validMoves(obj.line, obj.column);
+                        this.gameboard.unselectAllTiles();
                         this.gameboard.selectTiles(tiles);
                         this.state = 'waiting move tile';
                         this.fromTile = obj;
@@ -491,7 +445,6 @@ class MyGameOrchestrator {
                         this.gameboard.unselectAllTiles();
                         this.currAction = 'walk'
                         this.state = 'waiting move result';
-
                     } else {
                         this.gameboard.unselectAllTiles();
                         this.state = 'waiting select piece';
@@ -503,13 +456,12 @@ class MyGameOrchestrator {
                         this.dropTile = obj;
                         this.gameboard.unselectAllTiles();
                         this.state = 'waiting drop stone result';
-
                     }
                     break;
             }
         } else {
-            console.log("Picked object of type: " + obj.constructor.name + ", with pick id " + id);
-            console.log(obj);
+            // console.log("Picked object of type: " + obj.constructor.name + ", with pick id " + id);
+            // console.log(obj);
         }
     }
 
