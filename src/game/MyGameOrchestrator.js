@@ -298,7 +298,7 @@ class MyGameOrchestrator {
                         this.dropTile = this.gameboard.getTileByPosition(dropPosition[0], dropPosition[1])
                     }
                 }
-                let stoneBot, scoreBot
+                let stoneBot
                 if (this.dropTile != null) {
                     if (this.currPlayer == 'r') {
                         if (this.gameboard.red_stones.length) {
@@ -312,9 +312,7 @@ class MyGameOrchestrator {
                     this.gameMove = new MyGameMove(this.scene, stoneBot, null, this.dropTile);
                     this.gameSequence.addMove(this.gameMove);
                     this.gameStateStack.push(gameStateBot);
-                    scoreBot = this.gameboard.getScore();
-                    if (scoreBot != null)
-                        this.score.updateScore(this.gameboard.getScore());
+
                 }
 
                 this.fromTile.piece.setAnimator(this.toTile, this.fromTile, this.secsFromStart);
@@ -331,11 +329,13 @@ class MyGameOrchestrator {
             case 'animating bot move':
                 if (!this.fromTile.piece.animate(this.secsFromStart)) {
                     this.fromTile.piece.animator = null;
-
+                    this.gameboard.increaseScoreBot(this.toTile, this.currPlayer);
+                    let scoreBot = this.gameboard.getScore();
+                    if (scoreBot != null)
+                        this.score.updateScore(this.gameboard.getScore());
                     this.fromTile.piece.tile = this.toTile;
                     this.toTile.piece = this.fromTile.piece;
                     this.fromTile.piece = null;
-
                     if (this.dropTile == null) {
                         this.state = 'set camera to rotate';
                     } else {
@@ -359,7 +359,7 @@ class MyGameOrchestrator {
                 break;
 
             case 'game over':
-                alert((this.currPlayer == 'r' ? 'Red Player' : 'Yellow Player') + ' won!!');
+                alert((this.gameboard.gameEnded() == 1 ? 'Red Player' : 'Yellow Player') + ' won!!');
                 this.state = 'reload';
                 break;
 

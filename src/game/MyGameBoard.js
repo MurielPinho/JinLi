@@ -20,13 +20,13 @@ class MyGameBoard {
         this.placed_yellow_stones = [];
         this.gameState = {
             "board": {
-                7: ["r", "empty", "empty", "empty", "empty", "empty", "y"],
-                6: ["empty", "empty", "empty", "empty", "empty", "empty", "empty"],
-                5: ["empty", "empty", "empty", "empty", "empty", "empty", "empty"],
-                4: ["empty", "empty", "empty", "empty", "empty", "empty", "empty"],
-                3: ["empty", "empty", "empty", "empty", "empty", "empty", "empty"],
+                1: ["r", "empty", "empty", "empty", "empty", "empty", "y"],
                 2: ["empty", "empty", "empty", "empty", "empty", "empty", "empty"],
-                1: ["r", "empty", "empty", "empty", "empty", "empty", "y"]
+                3: ["empty", "empty", "empty", "empty", "empty", "empty", "empty"],
+                4: ["empty", "empty", "empty", "empty", "empty", "empty", "empty"],
+                5: ["empty", "empty", "empty", "empty", "empty", "empty", "empty"],
+                6: ["empty", "empty", "empty", "empty", "empty", "empty", "empty"],
+                7: ["r", "empty", "empty", "empty", "empty", "empty", "y"]
             },
             "stones": [10, 10],
             "scores": [0, 0]
@@ -250,12 +250,24 @@ class MyGameBoard {
 
     }
 
+    increaseScoreBot(toTile, currPlayer) {
+        let points = 0;
+        for (let columnIndex = -1; columnIndex < 2; columnIndex++) {
+            for (let lineIndex = -1; lineIndex < 2; lineIndex++) {
+                if (lineIndex + toTile.line <= 0 || lineIndex + toTile.line >= 8 || columnIndex + toTile.column <= 0 || columnIndex + toTile.column >= 8 || (lineIndex === 0 && columnIndex == 0)) continue;
+                let tile = this.gameState["board"][lineIndex + toTile.line][columnIndex + toTile.column - 1];
+                if (tile == 'r' || tile == 'y') points++
+            }
+        }
+        (currPlayer === 'r') ? this.gameState['scores'][0] += points: this.gameState['scores'][1] += points;
+    }
+
     movePieceBot(fromTile, toTile, currPlayer) {
         let board = this.gameState["board"]
         let piece = board[fromTile.line][fromTile.column - 1]
         board[toTile.line][toTile.column - 1] = piece;
         board[fromTile.line][fromTile.column - 1] = "empty"
-        this.increaseScore(toTile, currPlayer);
+
 
     }
 
@@ -343,17 +355,12 @@ class MyGameBoard {
                 [piece.tile.line, piece.tile.column], move
             ]));
         }
-        let choosenMove, points, choosenDrop, tmpMove, tmpDrop, tmpPoints, tmp, dasd
-        if (!difficulty) {
+        let choosenMove, points, choosenDrop, tmpMove, tmpDrop, tmpPoints
+        if (difficulty == 2) {
             points = 0;
             moves.forEach((currentMove) => {
-                [tmpMove, tmpDrop, tmpPoints, tmp] = this.simulateMove(currentMove)
-                if (tmpPoints >= points) {
-                    choosenMove = tmpMove;
-                    choosenDrop = tmpDrop;
-                    points = tmpPoints;
-                    dasd = tmp
-                }
+                [tmpMove, tmpDrop, tmpPoints] = this.simulateMove(currentMove)
+                if (tmpPoints >= points)[choosenMove, choosenDrop, points] = [tmpMove, tmpDrop, tmpPoints];
             });
         } else {
             choosenMove = moves[Math.floor(Math.random() * moves.length)];
@@ -369,14 +376,14 @@ class MyGameBoard {
         tmpGameState["board"][move[1][0]][move[1][1] - 1] = tmpGameState["board"][move[0][0]][move[0][1] - 1];
         tmpGameState["board"][move[0][0]][move[0][1] - 1] = "empty";
         let points = 0;
-        let fromLine = move[1][0]
-        let fromColumn = move[1][1]
-        let toLine = move[0][0]
-        let toColumn = move[0][1]
+        let toLine = move[1][0]
+        let toColumn = move[1][1]
+        let fromLine = move[0][0]
+        let fromColumn = move[0][1]
         for (let columnIndex = -1; columnIndex < 2; columnIndex++) {
             for (let lineIndex = -1; lineIndex < 2; lineIndex++) {
-                if (lineIndex + fromLine <= 0 || lineIndex + fromLine >= 8 || columnIndex + fromColumn <= 0 || columnIndex + fromColumn >= 8 || (lineIndex === 0 && columnIndex == 0) || (fromLine === toLine && toColumn === fromColumn)) continue;
-                let tile = tmpGameState["board"][lineIndex + fromLine][columnIndex + fromColumn - 1];
+                if (lineIndex + toLine <= 0 || lineIndex + toLine >= 8 || columnIndex + toColumn <= 0 || columnIndex + toColumn >= 8 || (lineIndex === 0 && columnIndex == 0) || (toLine === fromLine && fromColumn === toColumn)) continue;
+                let tile = tmpGameState["board"][lineIndex + toLine][columnIndex + toColumn - 1];
                 if (tile == 'r' || tile == 'y') {
                     points++
                 }
@@ -385,7 +392,7 @@ class MyGameBoard {
         }
         let drops = this.validDrops(tmpGameState);
         let choosenDrop = drops[Math.floor(Math.random() * drops.length)]
-        return [move, choosenDrop, points, tmpGameState]
+        return [move, choosenDrop, points]
 
     }
 }
