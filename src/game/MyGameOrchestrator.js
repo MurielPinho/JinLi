@@ -291,19 +291,32 @@ class MyGameOrchestrator {
                 this.currAction = botMove[0];
                 this.score.updateScore(this.gameboard.getScore());
                 let dropPosition = botMove[2];
-                this.dropTile = (this.currAction === 'walk') ? this.gameboard.getTileByPosition(dropPosition[0], dropPosition[1]) : null;
-                let stoneBot, scoreBot
-                if (this.currPlayer == 'r') {
-                    stoneBot = this.gameboard.red_stones[this.gameboard.red_stones.length - 1]
-                } else {
-                    stoneBot = this.gameboard.yellow_stones[this.gameboard.yellow_stones.length - 1]
+                this.dropTile = null
+                if (this.currAction === 'walk') {
+                    if ((this.currPlayer == 'r' && this.gameboard.red_stones.length) || (this.currPlayer == 'y' && this.gameboard.yellow_stones.length)) {
+
+                        this.dropTile = this.gameboard.getTileByPosition(dropPosition[0], dropPosition[1])
+                    }
                 }
-                this.gameMove = new MyGameMove(this.scene, stoneBot, null, this.dropTile);
-                this.gameSequence.addMove(this.gameMove);
-                this.gameStateStack.push(gameStateBot);
-                scoreBot = this.gameboard.getScore();
-                if (scoreBot != null)
-                    this.score.updateScore(this.gameboard.getScore());
+                let stoneBot, scoreBot
+                if (this.dropTile != null) {
+                    if (this.currPlayer == 'r') {
+                        if (this.gameboard.red_stones.length) {
+                            stoneBot = this.gameboard.red_stones[this.gameboard.red_stones.length - 1]
+                        }
+                    } else {
+                        if (this.gameboard.yellow_stones.length) {
+                            stoneBot = this.gameboard.yellow_stones[this.gameboard.yellow_stones.length - 1]
+                        }
+                    }
+                    this.gameMove = new MyGameMove(this.scene, stoneBot, null, this.dropTile);
+                    this.gameSequence.addMove(this.gameMove);
+                    this.gameStateStack.push(gameStateBot);
+                    scoreBot = this.gameboard.getScore();
+                    if (scoreBot != null)
+                        this.score.updateScore(this.gameboard.getScore());
+                }
+
                 this.fromTile.piece.setAnimator(this.toTile, this.fromTile, this.secsFromStart);
 
 
