@@ -370,13 +370,21 @@ class MyGameBoard {
     }
 
     bestMove(moves, gameState) {
-        let choosenMove, points, choosenDrop, tmpMove, tmpDrop, tmpPoints
-        points = 0;
+        let tmpMove, tmpDrop, tmpPoints,
+            currPoints = 0,
+            bestMoves = []
         moves.forEach((currentMove) => {
             [tmpMove, tmpDrop, tmpPoints] = this.simulateMove(currentMove, gameState)
-            if (tmpPoints >= points)[choosenMove, choosenDrop, points] = [tmpMove, tmpDrop, tmpPoints];
+            if (tmpPoints > currPoints) {
+                currPoints = tmpPoints;
+                bestMoves = [];
+                bestMoves.push([tmpMove, tmpDrop]);
+            } else if (tmpPoints === currPoints) {
+                bestMoves.push([tmpMove, tmpDrop]);
+            }
         });
-        return [choosenMove, choosenDrop];
+
+        return bestMoves[Math.floor(Math.random() * bestMoves.length)];
     }
 
     simulateMove(move, gameState) {
@@ -384,20 +392,21 @@ class MyGameBoard {
         tmpGameState["board"][move[1][0]][move[1][1] - 1] = tmpGameState["board"][move[0][0]][move[0][1] - 1];
         tmpGameState["board"][move[0][0]][move[0][1] - 1] = "empty";
         let points = 0;
-        let toLine = move[1][0]
-        let toColumn = move[1][1]
-        let fromLine = move[0][0]
-        let fromColumn = move[0][1]
+        let [
+            [fromLine, fromColumn],
+            [toLine, toColumn]
+        ] = move;
         for (let columnIndex = -1; columnIndex < 2; columnIndex++) {
             for (let lineIndex = -1; lineIndex < 2; lineIndex++) {
                 if (lineIndex + toLine <= 0 || lineIndex + toLine >= 8 || columnIndex + toColumn <= 0 || columnIndex + toColumn >= 8 || (lineIndex === 0 && columnIndex == 0) || (toLine === fromLine && fromColumn === toColumn)) continue;
                 let tile = tmpGameState["board"][lineIndex + toLine][columnIndex + toColumn - 1];
                 if (tile == 'r' || tile == 'y') {
-                    points++
+                    points += 10;
                 }
             }
-
         }
+        points += (3 - Math.abs(4 - toColumn))
+
         let drops = this.validDrops(tmpGameState);
         let choosenDrop = drops[Math.floor(Math.random() * drops.length)]
         return [move, choosenDrop, points]
