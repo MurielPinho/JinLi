@@ -1,5 +1,6 @@
+const { TestWatcher } = require('jest');
 const MyGameBoard = require('../game/MyGameBoard')
-test('initialing gameboard', () => {
+test('Initializing gameboard', () => {
     let gameboard = new MyGameBoard();
     expect(gameboard.gameState).toEqual({
         "board": {
@@ -15,4 +16,12 @@ test('initialing gameboard', () => {
         "scores": [0, 0]
     })
 
+})
+
+test('Getting tiles by board position', () => {
+    let gameboard = new MyGameBoard();
+    expect(gameboard.getTileByPosition(1, 1)).toBe(gameboard.getTile('A1'));
+    expect(gameboard.getTileByPosition(1, 7)).toBe(gameboard.getTile('A7'));
+    expect(gameboard.getTileByPosition(4, 4)).toBe(gameboard.getTile('D4'));
+    expect(gameboard.getTileByPosition(4, 1)).toBe(gameboard.getTile('D1'));
 })
