@@ -10,6 +10,8 @@ Methods:
 	* Move piece (piece, starting tile, destination tile)
 	* Display the gameboard (render). Calls display of tiles and of pieces.
 */
+
+
 class MyGameBoard {
     constructor() {
         this.tiles = [];
@@ -396,3 +398,4 @@ class MyGameBoard {
 
     }
 }
+module.exports = MyGameBoard;

@@ -1,0 +1,29 @@
+{
+  "name": "jinli",
+  "version": "1.0.0",
+  "description": "Jin Li boardgame in a 3D environment",
+  "main": "main.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MurielPinho/JinLi.git"
+  },
+  "keywords": [
+    "boardgame",
+    "jinli"
+  ],
+  "author": "MurielPinho",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MurielPinho/JinLi/issues"
+  },
+  "homepage": "https://github.com/MurielPinho/JinLi#readme",
+  "devDependencies": {
+    "jest": "^27.1.0"
+  }
+}
