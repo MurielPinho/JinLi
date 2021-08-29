@@ -1,4 +1,4 @@
-# # Jin Li
+# Jin Li
 ## Introduction
 This project's goal was implementing the graphical interface for a board game that had its logic originally implemented in Prolog, the logic was ported for JavaScript so it could be run without using an external server. 
 
