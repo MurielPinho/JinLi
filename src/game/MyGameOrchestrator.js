@@ -398,11 +398,6 @@ class MyGameOrchestrator {
             if (this.state != 'rotating camera')
                 this.menu.toggleMenu();
         }
-
-        if (this.scene.gui.isKeyPressed("Space")) {
-            let result = this.gameboard.getBotMove(1, this.currPlayer);
-            this.gameboard.selectTiles([result[1][1]])
-        }
     }
 
     managePick(mode, results) {
