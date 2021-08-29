@@ -287,7 +287,7 @@ class MyGameOrchestrator {
                 this.toTile = this.gameboard.getTileByPosition(botPieceMove[1][0], botPieceMove[1][1]);
                 this.gameMove = new MyGameMove(this.scene, this.fromTile.piece, this.fromTile, this.toTile);
                 this.gameSequence.addMove(this.gameMove);
-                this.gameboard.movePieceBot(this.fromTile, this.toTile, this.currPlayer);
+                this.gameboard.movePieceBot(this.fromTile, this.toTile);
                 this.currAction = botMove[0];
                 this.score.updateScore(this.gameboard.getScore());
                 let dropPosition = botMove[2];
