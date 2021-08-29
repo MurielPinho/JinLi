@@ -108,8 +108,8 @@ test('Move points simulator', () => {
         moveResults.push(gameboard.simulateMove([initialPosition, currPosition], gameState)[2])
     }
     expect(moveResults).toEqual([
-        2, 1, 1, 0,
-        0, 0, 0, 1
+        23, 13, 13, 2,
+        1, 0, 1, 12
     ])
 
 })
