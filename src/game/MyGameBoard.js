@@ -264,7 +264,7 @@ class MyGameBoard {
         (currPlayer === 'r') ? this.gameState['scores'][0] += points: this.gameState['scores'][1] += points;
     }
 
-    movePieceBot(fromTile, toTile, currPlayer) {
+    movePieceBot(fromTile, toTile) {
         let board = this.gameState["board"]
         let piece = board[fromTile.line][fromTile.column - 1]
         board[toTile.line][toTile.column - 1] = piece;
@@ -357,24 +357,30 @@ class MyGameBoard {
                 [piece.tile.line, piece.tile.column], move
             ]));
         }
-        let choosenMove, points, choosenDrop, tmpMove, tmpDrop, tmpPoints
+        let choosenMove, choosenDrop;
         if (difficulty == 2) {
-            points = 0;
-            moves.forEach((currentMove) => {
-                [tmpMove, tmpDrop, tmpPoints] = this.simulateMove(currentMove)
-                if (tmpPoints >= points)[choosenMove, choosenDrop, points] = [tmpMove, tmpDrop, tmpPoints];
-            });
+            [choosenMove, choosenDrop] = this.bestMove(moves, this.gameState);
         } else {
             choosenMove = moves[Math.floor(Math.random() * moves.length)];
-            [choosenMove, choosenDrop, points] = this.simulateMove(choosenMove)
+            [choosenMove, choosenDrop] = this.simulateMove(choosenMove, this.gameState)
         }
         let maxTiles = Math.max(Math.abs(choosenMove[0][0] - choosenMove[1][0]), Math.abs(choosenMove[0][1] - choosenMove[1][1]))
         let moveType = (maxTiles < 2) ? "walk" : "jump";
         return [moveType, choosenMove, choosenDrop]
     }
 
-    simulateMove(move) {
-        let tmpGameState = JSON.parse(JSON.stringify(this.gameState));
+    bestMove(moves, gameState) {
+        let choosenMove, points, choosenDrop, tmpMove, tmpDrop, tmpPoints
+        points = 0;
+        moves.forEach((currentMove) => {
+            [tmpMove, tmpDrop, tmpPoints] = this.simulateMove(currentMove, gameState)
+            if (tmpPoints >= points)[choosenMove, choosenDrop, points] = [tmpMove, tmpDrop, tmpPoints];
+        });
+        return [choosenMove, choosenDrop];
+    }
+
+    simulateMove(move, gameState) {
+        let tmpGameState = JSON.parse(JSON.stringify(gameState));
         tmpGameState["board"][move[1][0]][move[1][1] - 1] = tmpGameState["board"][move[0][0]][move[0][1] - 1];
         tmpGameState["board"][move[0][0]][move[0][1] - 1] = "empty";
         let points = 0;
